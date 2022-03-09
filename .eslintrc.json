@@ -1,0 +1,13 @@
+{
+	"extends": ["standard-with-typescript"],
+	"parserOptions": {
+		"project": "./tsconfig.json"
+	},
+	"rules": {
+		"@typescript-eslint/quotes": ["error", "double"],
+		"@typescript-eslint/semi": ["error", "always"],
+		"@typescript-eslint/indent": ["error", "tab"],
+		"no-tabs": ["error", { "allowIndentationTabs": true }]
+	},
+	"ignorePatterns": ["*.mjs", "*.js"]
+}

@@ -1,0 +1,19 @@
+{
+  "scripts": {
+    "script": "ts-node ./src/run.ts"
+  },
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "fast-xml-parser": "^4.0.0-beta.5",
+    "iconv-lite": "^0.6.3"
+  },
+  "devDependencies": {
+    "@swc/core": "^1.2.151",
+    "@types/node": "^16.11.11",
+    "commander": "^9.0.0",
+    "eslint-config-standard-with-typescript": "^21.0.1",
+    "node-id3": "^0.2.3",
+    "ts-node": "^10.5.0",
+    "typescript": "^4.5.4"
+  }
+}

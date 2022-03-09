@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "outDir": "dist",
+    "target": "esnext",
+    "strict": true,
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "incremental": true,
+    "downlevelIteration": true,
+    "skipLibCheck": true
+  },
+  "ts-node": {
+    "swc": true,
+    "transpileOnly": true
+  }
+}

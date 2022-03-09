@@ -1,0 +1,2 @@
+- idemptonent mode
+	- will not throw an error when e.g. removing a track more than once, as long as the resulting state is the same
