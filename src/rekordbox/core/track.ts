@@ -1,8 +1,13 @@
 import { Library } from "./library";
 import { access } from "node:fs/promises";
 import {
-	addSafe, dateToRekordbox, decodeRekordboxLocation, isSameFilepath,
-	limitText, removeSafe, XMLSerializable
+	addSafe,
+	dateToRekordbox,
+	decodeRekordboxLocation,
+	isSameFilepath,
+	limitText,
+	removeSafe,
+	XMLSerializable,
 } from "../misc/lib";
 import { ITrackReference } from "../xml-types/nodes";
 import { ITrack } from "../xml-types/tracks";
@@ -12,12 +17,12 @@ import { Playlist } from "./playlist";
 import path from "path/posix";
 
 export interface RequiredTrackProperties {
-	id: string
-	size: number
-	averageBpm: number
-	bitRate: string
-	sampleRate: number
-	location: string
+	id: string;
+	size: number;
+	averageBpm: number;
+	bitRate: string;
+	sampleRate: number;
+	location: string;
 }
 
 export class Track implements XMLSerializable<ITrack> {
@@ -52,11 +57,11 @@ export class Track implements XMLSerializable<ITrack> {
 
 	private beatgrid: Beatgrid = new Beatgrid([], this);
 
-	getBeatgrid (): Beatgrid {
+	getBeatgrid(): Beatgrid {
 		return this.beatgrid;
 	}
 
-	setBeatgrid (newBeatgrid: Beatgrid): void {
+	setBeatgrid(newBeatgrid: Beatgrid): void {
 		this.beatgrid.unregisterTrack(this);
 		this.beatgrid = newBeatgrid;
 		this.beatgrid.registerTrack(this);
@@ -64,11 +69,11 @@ export class Track implements XMLSerializable<ITrack> {
 
 	private cues: Cues = new Cues(this);
 
-	getCues (): Cues {
+	getCues(): Cues {
 		return this.cues;
 	}
 
-	setCues (newCues: Cues): void {
+	setCues(newCues: Cues): void {
 		this.cues.unregisterTrack(this);
 		this.cues = newCues;
 		this.cues.registerTrack(this);
@@ -76,24 +81,26 @@ export class Track implements XMLSerializable<ITrack> {
 
 	private readonly playlists: Set<Playlist> = new Set();
 
-	registerPlaylist (playlist: Playlist): void {
-		addSafe(this.playlists, playlist);
+	registerPlaylist(playlist: Playlist): void {
+		if (!this.playlists.has(playlist)) {
+			addSafe(this.playlists, playlist);
+		}
 	}
 
 	/** Creates an array from the playlists that the tracks knows */
-	getPlaylists (): Playlist[] {
+	getPlaylists(): Playlist[] {
 		return Array.from(this.playlists);
 	}
 
-	isInPlaylist (playlist: Playlist): boolean {
+	isInPlaylist(playlist: Playlist): boolean {
 		return this.playlists.has(playlist);
 	}
 
-	unregisterPlaylist (playlist: Playlist): void {
+	unregisterPlaylist(playlist: Playlist): void {
 		removeSafe(this.playlists, playlist);
 	}
 
-	constructor (
+	constructor(
 		public library: Library,
 		requiredProperties: RequiredTrackProperties
 	) {
@@ -105,7 +112,7 @@ export class Track implements XMLSerializable<ITrack> {
 		this.location = requiredProperties.location;
 	}
 
-	serialize (): ITrack {
+	serialize(): ITrack {
 		return {
 			TrackID: this.id,
 			Name: this.name,
@@ -121,13 +128,19 @@ export class Track implements XMLSerializable<ITrack> {
 			TrackNumber: String(this.trackNumber),
 			Year: String(this.year),
 			AverageBpm: String(this.averageBpm),
-			DateModified: (this.dateModified !== undefined) ? dateToRekordbox(this.dateModified) : undefined,
+			DateModified:
+				this.dateModified !== undefined
+					? dateToRekordbox(this.dateModified)
+					: undefined,
 			DateAdded: dateToRekordbox(this.dateAdded),
 			BitRate: this.bitRate,
 			SampleRate: String(this.sampleRate),
 			Comments: this.comments,
 			PlayCount: String(this.playCount),
-			LastPlayed: (this.lastPlayed !== undefined) ? dateToRekordbox(this.lastPlayed) : undefined,
+			LastPlayed:
+				this.lastPlayed !== undefined
+					? dateToRekordbox(this.lastPlayed)
+					: undefined,
 			Rating: this.rating,
 			Location: `file://localhost/${encodeURIComponent(this.location)}`,
 			Remixer: this.remixer,
@@ -136,18 +149,18 @@ export class Track implements XMLSerializable<ITrack> {
 			Mix: this.mix,
 			Colour: this.colour,
 			TEMPO: this.beatgrid.serialize(),
-			POSITION_MARK: this.cues.serialize()
+			POSITION_MARK: this.cues.serialize(),
 		};
 	}
 
-	static createFromXML (library: Library, data: ITrack): Track {
+	static createFromXML(library: Library, data: ITrack): Track {
 		const track = new Track(library, {
 			id: data.TrackID,
 			averageBpm: Number.parseFloat(data.AverageBpm),
 			bitRate: data.BitRate,
 			location: decodeRekordboxLocation(data.Location),
 			sampleRate: Number.parseInt(data.SampleRate),
-			size: Number.parseInt(data.Size, 10)
+			size: Number.parseInt(data.Size, 10),
 		});
 
 		track.name = data.Name;
@@ -190,37 +203,39 @@ export class Track implements XMLSerializable<ITrack> {
 		return track;
 	}
 
-	createSerialReference (): ITrackReference {
+	createSerialReference(): ITrackReference {
 		return {
-			Key: this.id
+			Key: this.id,
 		};
 	}
 
-	async readID3Tags (): Promise<void> {}
+	async readID3Tags(): Promise<void> {}
 
-	equals (track: Track): boolean {
+	equals(track: Track): boolean {
 		return track.id === this.id;
 	}
 
-	setRecordboxLocation (rekordboxLocation: string): void {
+	setRecordboxLocation(rekordboxLocation: string): void {
 		const locationRegex = /^file:\/\/localhost\/(.*)$/;
 		const result = locationRegex.exec(rekordboxLocation);
 
 		if (result === null) {
-			throw new Error("unknown location format: " + JSON.stringify(rekordboxLocation));
+			throw new Error(
+				"unknown location format: " + JSON.stringify(rekordboxLocation)
+			);
 		}
 
 		this.location = decodeURIComponent(result[1]);
 	}
 
-	isSameLocation (location: string): boolean {
+	isSameLocation(location: string): boolean {
 		return isSameFilepath(this.location, location);
 	}
 
 	/**
 	 * Calls `fs` {@link access()} with {@link Track.location}
 	 */
-	async existsOnDisk (): Promise<boolean> {
+	async existsOnDisk(): Promise<boolean> {
 		try {
 			await access(this.location);
 			return true;
@@ -233,33 +248,40 @@ export class Track implements XMLSerializable<ITrack> {
 		}
 	}
 
-	toString (options?: {
-		id?: boolean
-		long?: boolean
-	}): string {
-		if ((options?.long) ?? false) {
-			return [
-				`TrackID: ${this.id}`,
+	async missingFromDisk(): Promise<boolean> {
+		return this.existsOnDisk().then((v) => !v);
+	}
+
+	toString(options?: { id?: boolean; long?: boolean }): string {
+		if (options?.long ?? false) {
+			const parts = options?.id ? [`TrackID: ${this.id}`] : [];
+
+			parts.push(
 				`Name: ${this.name}`,
 				`Artist: ${this.artist}`,
 				`Genre: ${this.genre}`
-			].join(", ");
+			);
+
+			return parts.join(", ");
 		}
 
-		let output = ((options?.id) ?? false) ? `[${this.id}] ` : "";
+		let output = options?.id ?? false ? `[${this.id}] ` : "";
 		output += `${limitText(this.artist, 60)} - ${limitText(this.name, 70)}`;
 		return output;
 	}
 
-	getPlaylistsReport (): Array<{ name: string, count: number}> {
+	getPlaylistsReport(): Array<{ name: string; count: number }> {
 		const playlists: Array<{
-			name: string
-			count: number
+			name: string;
+			count: number;
 		}> = [];
 
-		this.library.rootNode.walkNodesReportOnTrackContained(this, (playlist, count) => {
-			playlists.push({ name: playlist.name, count });
-		});
+		this.library.rootNode.walkNodesReportOnTrackContained(
+			this,
+			(playlist, count) => {
+				playlists.push({ name: playlist.name, count });
+			}
+		);
 
 		return playlists;
 	}
@@ -270,16 +292,16 @@ export class Track implements XMLSerializable<ITrack> {
 	 *
 	 * There are artist names where this might cause issues, like `"Axwell /\ Ingrosso"` => `["Axwell", "\Ingrosso"]`
 	 */
-	guessArtists (alsoSplitByComma = false): string[] {
+	guessArtists(alsoSplitByComma = false): string[] {
 		const regex = alsoSplitByComma ? /[,/]/g : /\//g;
-		return this.artist.split(regex).map(a => a.trim());
+		return this.artist.split(regex).map((a) => a.trim());
 	}
 
 	/**
 	 * Parses the file extension from the **{@link location} field, not the {@link kind} field (!)**
 	 * @returns a value like `"mp3"`, `"wav"` etc. (no leading period and doesn't change upper/lowercase)
 	 */
-	getFileExtension (): string {
+	getFileExtension(): string {
 		return path.parse(this.location).ext.slice(1);
 	}
 }

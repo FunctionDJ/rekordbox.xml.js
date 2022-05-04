@@ -11,6 +11,7 @@
     "@swc/core": "^1.2.151",
     "@types/node": "^16.11.11",
     "commander": "^9.0.0",
+    "eslint-config-prettier": "^8.5.0",
     "eslint-config-standard-with-typescript": "^21.0.1",
     "node-id3": "^0.2.3",
     "ts-node": "^10.5.0",

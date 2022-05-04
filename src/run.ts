@@ -10,8 +10,8 @@ program
 	.argument(
 		"[output-xml]",
 		"The output .xml file, e.g. '../result.xml'. " +
-		"This is optional because scripts may not output a .xml file " +
-		"and only show some text output in the terminal."
+			"This is optional because scripts may not output a .xml file " +
+			"and only show some text output in the terminal."
 	)
 	.option("-t, --time", "Print the script execution time")
 	.parse();
@@ -22,7 +22,7 @@ const main = async (): Promise<void> => {
 	log("Loading script and input .xml file...");
 	const [script, library] = await Promise.all([
 		loadScript(scriptName),
-		loadInputXml(inputXmlFile)
+		loadInputXml(inputXmlFile),
 	]);
 
 	if (script.returnsLibrary && maybeOutputXmlFile === undefined) {

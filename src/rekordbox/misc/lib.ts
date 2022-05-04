@@ -52,36 +52,31 @@ export const limitText = (text: string, length: number): string => {
 	return text.slice(0, Math.max(length, 0)) + "...";
 };
 
-type IsPreciselyString<T> = (
-	[T] extends [string] ? (
-		[string] extends [T] ? true : false
-	) : false
-);
+type IsPreciselyString<T> = [T] extends [string]
+	? [string] extends [T]
+		? true
+		: false
+	: false;
 
 export type Loosen<T extends {}> = {
-	[k in keyof T]:
-	IsPreciselyString<T[k]> extends true
-		? string|number|boolean
-		: Loosen<T[k]>
+	[k in keyof T]: IsPreciselyString<T[k]> extends true
+		? string | number | boolean
+		: Loosen<T[k]>;
 };
 
 export interface XMLSerializable<T> {
-	serialize: () => Loosen<T>
+	serialize: () => Loosen<T>;
 }
 
-export const dateToRekordbox = (date: Date): string => (
-	date.toISOString()
-		.split("T")[0]
-);
+export const dateToRekordbox = (date: Date): string =>
+	date.toISOString().split("T")[0];
 
-export const rekordboxToDate = (rbDate: string): Date => (
-	new Date(rbDate)
-);
+export const rekordboxToDate = (rbDate: string): Date => new Date(rbDate);
 
 export interface CueColor {
-	red: number
-	green: number
-	blue: number
+	red: number;
+	green: number;
+	blue: number;
 }
 
 export const numToHotCueChar = (num: number): string => {
@@ -104,4 +99,30 @@ export const hotCueCharToNum = (char: string): number => {
 	}
 
 	return num;
+};
+
+export const asyncFilter = async <T>(
+	arr: T[],
+	predicate: (value: T, index: number, array: T[]) => Promise<unknown>
+) => {
+	const results = await asyncMap(arr, predicate);
+	return arr.filter((_v, index) => results[index]);
+};
+
+export const asyncMap = async <T, U>(
+	arr: T[],
+	callbackFn: (value: T, index: number, array: T[]) => Promise<U>
+) => {
+	const promises = arr.map(callbackFn);
+	return await Promise.all(promises);
+};
+
+export const isBetween = (
+	number: number,
+	boundaryA: number,
+	boundaryB: number
+): boolean => {
+	const min = Math.min(boundaryA, boundaryB);
+	const max = Math.max(boundaryA, boundaryB);
+	return number > min && number < max;
 };
